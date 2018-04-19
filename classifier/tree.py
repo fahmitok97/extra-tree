@@ -22,7 +22,7 @@ def __max_freq(labels):
 	for label in labels:
 		if label in map_labels.keys():
 			map_labels[label] += 1
-		else
+		else:
 			map_labels[label] = 1
 
 	frequent_label = labels[0]
@@ -34,12 +34,29 @@ def __max_freq(labels):
 
 	return frequent_label
 
+def __score(labels, split):
+	n = len(split)
+	nAtt = len(split[0])
 
+	h_c = __entropy(labels)
+	C_ct = list()
 
+	for i in range(nAtt) :
+		curr_split = split[:,i]
+		h_t = __entropy(curr_split)
+		idx_c1 = [i for (i, val) in enumerate(curr_split) if val in curr_split]
+		idx_c2 = [i for (i, val) in enumerate(curr_split) if val not in curr_split]
+		y_c1 = labels[idx_c1]
+		y_c2 = labels[idx_c2]
 
+		h_ct = __entropy(y_c1) + __entropy(y_c2)
+		I_ct = h_c - h_ct
+		C_ct = 2*I_ct/(h_c+h_t)
+	
+	scores = C_ct
+	
+	return [val for (i, val) in enumerate(curr_split) if i == None]
 
-def __score():
-	pass
 
 def __random_split():
 	pass
