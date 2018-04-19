@@ -1,6 +1,6 @@
 from tree import __ExtraTreeClassifier as ETClassifier
 
-class ExtraTreeClassifier():
+class ExtraTreesClassifier():
 	'''
 	Instantiation should maintain any hyperparameter tuning for the Ensemble and ExtraTree itself
 	Parameters:
@@ -25,7 +25,7 @@ class ExtraTreeClassifier():
 		predictions = [[target[0] * len(data[data.keys()[0]])] * self.num_trees]
 
 		for idx in range(self.num_trees):
-			predictions[i] = ensemble[idx].train(data, target)
+			predictions[idx] = self.ensemble[idx].train(data, target)
 
 		prediction = [target[0] * len(data[data.keys()[0]])]
 		num_correct_label = 0
@@ -58,12 +58,12 @@ class ExtraTreeClassifier():
 	- prediction : Nx1 vector of predicted class for each datapoint
 	'''
 	def predict(self, data):
-		predictions = [[target[0] * len(data[data.keys()[0]])] * self.num_trees]
+		predictions = [[] * self.num_trees]
 
 		for idx in range(self.num_trees):
-			predictions[i] = ensemble[idx].predict(data)
+			predictions[idx] = self.ensemble[idx].predict(data)
 
-		prediction = [target[0] * len(data[data.keys()[0]])]
+		prediction = ["" * len(data[data.keys()[0]])]
 
 		for idx_test in range(len(data[data.keys()[0]])):
 			cnt = {}
