@@ -15,6 +15,28 @@ def __entropy(labels):
 
 	return entropy
 
+def __max_freq(labels):
+	n = len(labels)
+	map_labels = {}
+
+	for label in labels:
+		if label in map_labels.keys():
+			map_labels[label] += 1
+		else
+			map_labels[label] = 1
+
+	frequent_label = labels[0]
+	freq = -1
+	for label in map_labels.keys():
+		if map_labels[label] > freq:
+			freq = map_labels[label]
+			frequent_label = label
+
+	return frequent_label
+
+
+
+
 
 def __score():
 	pass
