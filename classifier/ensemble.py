@@ -10,7 +10,10 @@ class ExtraTreesClassifier():
 	'''
 	def __init__(self, num_trees=200, max_features=10, min_split=2):
 		self.num_trees = num_trees
-		self.ensemble = [ETClassifier(max_features, min_split) * num_trees] #TODO: belum pasti parameter ET
+		self.ensemble = []
+
+		for i in range(self.num_trees):
+			self.ensemble.append(ETClassifier(max_features, min_split))
 
 	'''
 	Train should implement the subroutine for training all ET tree in ensemble
@@ -22,15 +25,15 @@ class ExtraTreesClassifier():
 	- score: percentage of (correct_label/training_size)
 	'''
 	def train(self, data, target):
-		predictions = [[target[0] * len(data[data.keys()[0]])] * self.num_trees]
+		predictions = [[] for i in range(self.num_trees)]
 
 		for idx in range(self.num_trees):
 			predictions[idx] = self.ensemble[idx].train(data, target)
 
-		prediction = [target[0] * len(data[data.keys()[0]])]
+		prediction = [target[0] for i in range(len(data[list(data.keys())[0]]))]
 		num_correct_label = 0
 
-		for idx_train in range(len(data[data.keys()[0]])):
+		for idx_train in range(len(data[list(data.keys())[0]])):
 			cnt = {}
 
 			for idx_tree in range(self.num_trees):
@@ -48,7 +51,7 @@ class ExtraTreesClassifier():
 			if prediction[idx_train] == target[idx_train]:
 				num_correct_label += 1
 
-		return prediction, num_correct_label/len(data[data.keys()[0]])
+		return prediction, num_correct_label/len(data[list(data.keys())[0]])
 
 	'''
 	Predict should return predicted class from given dataset
@@ -58,14 +61,14 @@ class ExtraTreesClassifier():
 	- prediction : Nx1 vector of predicted class for each datapoint
 	'''
 	def predict(self, data):
-		predictions = [[] * self.num_trees]
+		predictions = [[] for i in range(self.num_trees)]
 
 		for idx in range(self.num_trees):
 			predictions[idx] = self.ensemble[idx].predict(data)
 
-		prediction = ["" * len(data[data.keys()[0]])]
+		prediction = ["" for i in (data[list(data.keys())[0]])]
 
-		for idx_test in range(len(data[data.keys()[0]])):
+		for idx_test in range(len(data[list(data.keys())[0]])):
 			cnt = {}
 
 			for idx_tree in range(self.num_trees):
@@ -81,3 +84,23 @@ class ExtraTreesClassifier():
 					num_predicted = cnt[pred]
 
 		return prediction
+
+# import random
+# ensemble = ExtraTreesClassifier(5, 5)
+# n = 100
+# data = {"x": [], "y": []}
+# label = []
+# for i in range(50):
+# 	label.append("k1")
+# 	data["x"].append(random.randint(50, 100))
+# 	data["y"].append(random.randint(1,10))
+# for i in range(50):
+# 	label.append("k2")
+# 	data["x"].append(random.randint(1, 40))
+# 	data["y"].append(random.randint(20,40))
+# print(ensemble.train(data, label))
+# test = {"x": [], "y": []}
+# for i in range(50):
+# 	test["x"].append(random.randint(1, 20))
+# 	test["y"].append(random.randint(1,40))
+# print(ensemble.predict(test))

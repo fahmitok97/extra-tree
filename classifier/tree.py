@@ -1,10 +1,9 @@
 import math
 import random
 
-def __entropy(labels):
+def _entropy(labels):
 	n = len(labels)
 	unique_labels = list(set(labels))
-
 	entropy = 0
 	for label in unique_labels:
 		cnt = 0
@@ -16,7 +15,7 @@ def __entropy(labels):
 
 	return entropy
 
-def __max_freq(labels):
+def _max_freq(labels):
 	n = len(labels)
 	map_labels = {}
 
@@ -35,34 +34,34 @@ def __max_freq(labels):
 
 	return frequent_label
 
-def __score(labels, split):
-	num_row = len(split[split.keys()[0]])
+def _score(labels, split):
+	num_row = len(split[list(split.keys())[0]])
 	num_feature = len(split.keys())
 
-	out_entropy = __entropy(labels)
+	out_entropy = _entropy(labels)
 	normalized_info_gain = {}
 
-	for feature in range(num_feature) :
+	for feature in split.keys() :
 		curr_split = split[feature]
-		split_entropy = __entropy(curr_split)
+		split_entropy = _entropy(curr_split)
 		idx_left_child = [key for (key, val) in enumerate(curr_split) if val == True]
 		idx_right_child = [key for (key, val) in enumerate(curr_split) if val == False]
 
 		y_left_child = [ labels[key] for key in idx_left_child ]
 		y_right_child = [ labels[key] for key in idx_right_child ]
 
-		average_split_entropy = (len(y_left_child)/num_row)*__entropy(y_left_child) + (len(y_right_child)/num_row)*__entropy(y_right_child)
+		average_split_entropy = (len(y_left_child)/num_row)*_entropy(y_left_child) + (len(y_right_child)/num_row)*_entropy(y_right_child)
 		info_gain = out_entropy - average_split_entropy
 		normalized_info_gain[feature] = 2.0*info_gain/(out_entropy+split_entropy)
 
 	return normalized_info_gain
 
-def __random_split(dataset):
-	num_row = len(dataset[dataset.keys()[0]])
+def _random_split(dataset):
+	num_row = len(dataset[list(dataset.keys())[0]])
 	num_feature = len(dataset.keys())
 
 	split = {}
-	split_val = []
+	split_val = {}
 	for feature in dataset.keys():
 		split[feature] = []
 
@@ -75,21 +74,21 @@ def __random_split(dataset):
 
 			cut_point = (maks-mins)*random.uniform(0, 1) + mins
 
-			split_val.append(cut_point)
+			split_val[feature] = cut_point
 			for data in dataset[feature]:
 				split[feature].append(data > cut_point)
 		else :
 			selected_sample = random.choice(dataset[feature])
 
-			split_val.append(selected_sample)
+			split_val[feature] = selected_sample
 			for data in dataset[feature]:
 				split[feature].append(data == selected_sample)
 
 	return split, split_val
 
 
-class __Node():
-	def __init__():
+class _Node():
+	def __init__(self):
 		self.left_child = None
 		self.right_child = None
 		self.split_feature = None
@@ -99,39 +98,48 @@ class __Node():
 		self.score = 0
 		self.depth = 0
 
-
-
 class ExtraTreeClassifier():
 	def __init__(self, max_features, min_split):
-		slef.MAX_DEPTH = 100
+		self.MAX_DEPTH = 100
 		self.max_features = max_features
 		self.min_split = min_split
-		self.root = __Node()
+		self.root = _Node()
 
 	def __train(self, data, label, depth):
-		node = __Node()
-		num_row = len(data[data.keys()[0]])
+		node = _Node()
+		num_row = len(data[list(data.keys())[0]])
 		num_feature = len(data.keys())
 
-		selected_feature = random.shuffle(data.keys())
+		if ( (num_row < self.min_split) or (len(set(label)) <= 1) ):
+			node.is_leaf = True
+			node.leaf_value = _max_freq(label)
+			node.depth = depth
+
+			return node
+
+		selected_feature = list(data.keys())
+		random.shuffle(selected_feature)
+
 		sub_data = {}
 
-		for idx in range(max_features):
+		for idx in range(min(len(selected_feature), self.max_features)):
 			sub_data[selected_feature[idx]] = data[selected_feature[idx]]
 
-		split, split_val = __random_split(sub_data)
-		split_score = __score(label, split)
+		split, split_val = _random_split(sub_data)
+		split_score = _score(label, split)
 
 		max_info_gain_feature = selected_feature[0]
-		max_info_gain_val = split_score[selected_feature[0]]
+		max_info_gain_score = split_score[selected_feature[0]]
 		for feature in selected_feature:
-			if max_info_gain_val < split_score[feature]:
+			if max_info_gain_score < split_score[feature]:
 				max_info_gain_feature = feature
-				max_info_gain_val = split_score[feature]
+				max_info_gain_score = split_score[feature]
 
-		if ( (num_row < self.min_split) or (len(set(label)) <= 1) or (len(set(split[max_info_gain_feature])) == 1) or (depth > self.MAX_DEPTH) ):
+		max_info_gain_val = split_val[feature]
+
+		if ( (len(set(split[max_info_gain_feature])) == 1) or (depth > self.MAX_DEPTH) ):
 			node.is_leaf = True
-			node.leaf_value = __max_freq(label)
+			node.leaf_value = _max_freq(label)
 			node.depth = depth
 
 			return node
@@ -172,14 +180,14 @@ class ExtraTreeClassifier():
 
 		if type(datapoint[node.split_feature]) == float:
 			if datapoint[node.split_feature] > node.split_val:
-				return self.predict(node.left_child, datapoint)
+				return self.__predict(node.left_child, datapoint)
 			else:
-				return self.predict(node.right_child, datapoint)
+				return self.__predict(node.right_child, datapoint)
 		else:
 			if datapoint[node.split_feature] == node.split_val:
-				return self.predict(node.left_child, datapoint)
+				return self.__predict(node.left_child, datapoint)
 			else:
-				return self.predict(node.right_child, datapoint)
+				return self.__predict(node.right_child, datapoint)
 
 	def train(self, data, label):
 		self.root = self.__train(data, label, 1)
@@ -187,7 +195,7 @@ class ExtraTreeClassifier():
 
 	def predict(self, data):
 		label = []
-		for idx in range(len(data[data.keys()[0]])):
+		for idx in range(len(data[list(data.keys())[0]])):
 			datapoint = {}
 
 			for feature in data.keys():
