@@ -1,5 +1,14 @@
 from random import randrange
 
+
+'''
+This method will split dataset by k 
+Input : 
+- dataset = NxM dataset with "pandas dataframe"-like format 
+- k = number of split 
+Output : 
+- dataset_split = data after split by k 
+'''
 def cross_validation_split(dataset, k=10):
 	dataset_split = list()
 	dataset_copy = list(dataset)
@@ -14,6 +23,15 @@ def cross_validation_split(dataset, k=10):
 	return dataset_split
 
 
+'''
+This method will get the training and validation set for each fold 
+Input : 
+- split = data after split by k
+- fold = number of current fold 
+Output : 
+- training_set = the training set for each fold 
+- validation_set = the validation set for each fold 
+'''
 def cross_validation_fold(split, fold):
 	training_set = list()
 	validation_set = list()
@@ -25,11 +43,30 @@ def cross_validation_fold(split, fold):
 	return training_set, validation_set
 
 
+'''
+This method will get the accuracy score of the classifier 
+Input : 
+- labels = labels of input dataset 
+- predicts = the result set by the classifier 
+Output : 
+- accuracy_score = score for the accuracy of the classifier 
+'''
 def accuracy_score(labels, predicts): 
 	count = len(["ok" for idx, label in enumerate(labels) if label == predicts[idx]])
 	return float(count) / len(labels)
 
 
+'''
+This method will validate using cross validation after split for each fold 
+Input : 
+- learner = learner used for this classifer (ExtraTreeClassifier)
+- dataset = NxM dataset with "pandas dataframe"-like format 
+- label = labels of input dataset 
+- k = number of split 
+Output : 
+- train_folds_score = the validation score of the training set
+- validation_folds_score = the validation score of the validation set
+'''
 def cross_validate(learner, dataset, label, k=10): 
 	train_folds_score = []
 	validation_folds_score = []
