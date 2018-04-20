@@ -84,23 +84,3 @@ class ExtraTreesClassifier():
 					num_predicted = cnt[pred]
 
 		return prediction
-
-# import random
-# ensemble = ExtraTreesClassifier(5, 5)
-# n = 100
-# data = {"x": [], "y": []}
-# label = []
-# for i in range(50):
-# 	label.append("k1")
-# 	data["x"].append(random.randint(50, 100))
-# 	data["y"].append(random.randint(1,10))
-# for i in range(50):
-# 	label.append("k2")
-# 	data["x"].append(random.randint(1, 40))
-# 	data["y"].append(random.randint(20,40))
-# print(ensemble.train(data, label))
-# test = {"x": [], "y": []}
-# for i in range(50):
-# 	test["x"].append(random.randint(1, 20))
-# 	test["y"].append(random.randint(1,40))
-# print(ensemble.predict(test))

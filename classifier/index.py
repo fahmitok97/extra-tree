@@ -55,7 +55,15 @@ def main() :
     '''
     
     train_score, prediction_score = cross_validate(ensemble, data, label, 10)
-    print(train_score, prediction_score)
+    '''
+    Training score are score of each training set that is trained and then predict again for each k
+    Prediction score are score of each training set that is tranin and then predict the validation set that is validate with the real label in validation_label
+    '''
+
+    print ("\nTraining Score :\n")
+    print(train_score)
+    print("\nPrediction Score: \n")
+    print(prediction_score)
 
 if __name__ == '__main__':
     main()

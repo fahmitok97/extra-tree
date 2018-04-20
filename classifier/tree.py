@@ -1,6 +1,16 @@
 import math
 import random
 
+'''
+finds the Shannon entropy of a vector of classes
+  
+Inputs : 
+Y             = vector of classes 
+sampleWeights = weights of the samples (used for IterativeInputSelection) 
+ 
+Outputs :    
+entropy = Shannon entropy of Y
+'''
 def _entropy(labels):
 	n = len(labels)
 	unique_labels = list(set(labels))
@@ -14,7 +24,17 @@ def _entropy(labels):
 		entropy -= (cnt/n)*math.log2(cnt/n)
 
 	return entropy
+'''
+Finds the frequency of classes (categories) within a vector of classes, and returns
+a frequency table and the most frequent class
+  
+Inputs : 
+labels      = Output of classes 
 
+Outputs :    
+frequent_label               = Frequency table of classes within Y
+
+'''
 def _max_freq(labels):
 	n = len(labels)
 	map_labels = {}
@@ -34,6 +54,17 @@ def _max_freq(labels):
 
 	return frequent_label
 
+'''
+This function computes the score
+with each split on the targets values.
+
+Inputs :  
+Y             = set if target values
+split         = random split for each selected attribute
+
+Outputs : 
+normalized_info_gain    = the info gain of each split
+'''
 def _score(labels, split):
 	num_row = len(split[list(split.keys())[0]])
 	num_feature = len(split.keys())
@@ -56,6 +87,19 @@ def _score(labels, split):
 
 	return normalized_info_gain
 
+'''
+This function generates random splits using the subset of 
+attributes in S.
+
+Inputs : 
+S         = dataset of randomly selected attributes
+inputType = binary vector indicating feature type (0:categorical, 1:numerical)
+
+Outputs : 
+split     	= random split for each selected attribute
+split_val      = cut point for each split
+
+'''
 def _random_split(dataset):
 	num_row = len(dataset[list(dataset.keys())[0]])
 	num_feature = len(dataset.keys())
@@ -86,7 +130,19 @@ def _random_split(dataset):
 
 	return split, split_val
 
+'''
+Intialized tree:
 
+The Extra-Tree, which is a nested STRUCT of nodes with the following fields    
+
+left_child, right_child = children nodes (set to NaN for leaf nodes)
+split_feature  = column of the feature used for the split
+split_val   = value used for the split
+is_leaf     = binary digit identifying a leaf
+leaf_value  = class distribution at the leaf
+score = initlalize score cut point
+
+'''
 class _Node():
 	def __init__(self):
 		self.left_child = None
@@ -98,13 +154,32 @@ class _Node():
 		self.score = 0
 		self.depth = 0
 
+'''
+Builds an Extra-Tree recursively and returns the predictions on the 
+training data set, as well as the scores (Information Gain) associated with each candidate input
+ 
+Inputs : 
+max_features  = number of features randomly selected at each node
+min_split     = minimum sample size for splitting a node
+'''
 class ExtraTreeClassifier():
+	'''
+	Initialize max depth, and max features
+	'''
 	def __init__(self, max_features, min_split):
 		self.MAX_DEPTH = 100
 		self.max_features = max_features
 		self.min_split = min_split
 		self.root = _Node()
-
+	'''
+	The helper method of training method for ETClassifier
+	Input :
+	- data          = the dataset of features
+	- depth     	= depth of the current node 
+	- label		    = output label
+	Output :
+	- node			= root node
+	'''
 	def __train(self, data, label, depth):
 		node = _Node()
 		num_row = len(data[list(data.keys())[0]])
@@ -174,6 +249,14 @@ class ExtraTreeClassifier():
 
 			return node
 
+	'''
+	The helper method of prediction method for ETClassifier
+	Input :
+	- node		= the root node
+	- datapoint = the feature
+	Output :
+	- label		= the prediction label for the node
+	'''
 	def __predict(self, node, datapoint):
 		if node.is_leaf == True:
 			return node.leaf_value
@@ -189,10 +272,25 @@ class ExtraTreeClassifier():
 			else:
 				return self.__predict(node.right_child, datapoint)
 
+	'''
+	The training method for ETClassifier
+	Input :
+	- data          = the dataset of features
+	- label		    = output label
+	Output :
+	- prediction	= return the prediction of the training set
+	'''
 	def train(self, data, label):
 		self.root = self.__train(data, label, 1)
 		return self.predict(data)
 
+	'''
+	The prediction method for ETClassifier
+	Input :
+	- data          = the dataset of features
+	Output :
+	- label			= list of prediction label (class) for all the dataset
+	'''
 	def predict(self, data):
 		label = []
 		for idx in range(len(data[list(data.keys())[0]])):
