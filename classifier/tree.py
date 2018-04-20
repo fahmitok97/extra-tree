@@ -160,19 +160,39 @@ class ExtraTreeClassifier():
 			node.left_child = self.__train(data_left_child, label_left_child, depth+1)
 			node.right_child = self.__train(data_right_child, label_right_child, depth+1)
 			node.split_feature = max_info_gain_feature
-			node.split_val = split_val[node.split_features]
+			node.split_val = split_val[node.split_feature]
 			node.score = max_info_gain_val
 			node.depth = depth
 
 			return node
 
+	def __predict(self, node, datapoint):
+		if node.is_leaf == True:
+			return node.leaf_value
+
+		if type(datapoint[node.split_feature]) == float:
+			if datapoint[node.split_feature] > node.split_val:
+				return self.predict(node.left_child, datapoint)
+			else:
+				return self.predict(node.right_child, datapoint)
+		else:
+			if datapoint[node.split_feature] == node.split_val:
+				return self.predict(node.left_child, datapoint)
+			else:
+				return self.predict(node.right_child, datapoint)
 
 	def train(self, data, label):
-		self.root = __train(data, label, 1)
-		#TODO self validation
-
-
+		self.root = self.__train(data, label, 1)
+		return self.predict(data)
 
 	def predict(self, data):
-		pass
-		# TODO predict
+		label = []
+		for idx in range(len(data[data.keys()[0]])):
+			datapoint = {}
+
+			for feature in data.keys():
+				datapoint[feature] = data[feature][idx]
+
+			label.append(self.__predict(self.root, datapoint))
+
+		return label
