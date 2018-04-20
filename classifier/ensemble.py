@@ -1,4 +1,4 @@
-from tree import __ExtraTreeClassifier as ETClassifier
+from tree import ExtraTreeClassifier as ETClassifier
 
 class ExtraTreesClassifier():
 	'''

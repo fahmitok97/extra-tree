@@ -88,6 +88,91 @@ def __random_split(dataset):
 	return split, split_val
 
 
-class __ExtraTreeClassifier():
-	## TODO: core implementation of ETClassifier
-	pass
+class __Node():
+	def __init__():
+		self.left_child = None
+		self.right_child = None
+		self.split_feature = None
+		self.split_val = None
+		self.is_leaf = False
+		self.leaf_value = None
+		self.score = 0
+		self.depth = 0
+
+
+
+class ExtraTreeClassifier():
+	def __init__(self, max_features, min_split):
+		slef.MAX_DEPTH = 100
+		self.max_features = max_features
+		self.min_split = min_split
+		self.root = __Node()
+
+	def __train(self, data, label, depth):
+		node = __Node()
+		num_row = len(data[data.keys()[0]])
+		num_feature = len(data.keys())
+
+		selected_feature = random.shuffle(data.keys())
+		sub_data = {}
+
+		for idx in range(max_features):
+			sub_data[selected_feature[idx]] = data[selected_feature[idx]]
+
+		split, split_val = __random_split(sub_data)
+		split_score = __score(label, split)
+
+		max_info_gain_feature = selected_feature[0]
+		max_info_gain_val = split_score[selected_feature[0]]
+		for feature in selected_feature:
+			if max_info_gain_val < split_score[feature]:
+				max_info_gain_feature = feature
+				max_info_gain_val = split_score[feature]
+
+		if ( (num_row < self.min_split) or (len(set(label)) <= 1) or (len(set(split[max_info_gain_feature])) == 1) or (depth > self.MAX_DEPTH) ):
+			node.is_leaf = True
+			node.leaf_value = __max_freq(label)
+			node.depth = depth
+
+			return node
+
+		else :
+			data_left_child =  {}
+			data_right_child =  {}
+			label_left_child = []
+			label_right_child = []
+
+			for key in split.keys():
+				data_left_child[key] = []
+				data_right_child[key] = []
+
+			for idx in range(len(split[max_info_gain_feature])):
+				val = split[max_info_gain_feature][idx]
+				if val == True:
+					label_left_child.append(label[idx])
+					for key in split.keys():
+						data_left_child[key].append(data[key][idx])
+				else :
+					label_right_child.append(label[idx])
+					for key in split.keys():
+						data_right_child[key].append(data[key][idx])
+
+			node.left_child = self.__train(data_left_child, label_left_child, depth+1)
+			node.right_child = self.__train(data_right_child, label_right_child, depth+1)
+			node.split_feature = max_info_gain_feature
+			node.split_val = split_val[node.split_features]
+			node.score = max_info_gain_val
+			node.depth = depth
+
+			return node
+
+
+	def train(self, data, label):
+		self.root = __train(data, label, 1)
+		#TODO self validation
+
+
+
+	def predict(self, data):
+		pass
+		# TODO predict
