@@ -1,6 +1,9 @@
 import math
 import random
 
+'''
+helper method for calculating shannon entropy
+'''
 def _entropy(labels):
 	n = len(labels)
 	unique_labels = list(set(labels))
@@ -15,6 +18,9 @@ def _entropy(labels):
 
 	return entropy
 
+'''
+Helper method for calculating most frequent label that exist on the dataset
+'''
 def _max_freq(labels):
 	n = len(labels)
 	map_labels = {}
@@ -34,6 +40,9 @@ def _max_freq(labels):
 
 	return frequent_label
 
+'''
+Helper method for calculating information gain for particular splitting scheme
+'''
 def _score(labels, split):
 	num_row = len(split[list(split.keys())[0]])
 	num_feature = len(split.keys())
@@ -56,6 +65,9 @@ def _score(labels, split):
 
 	return normalized_info_gain
 
+'''
+Helper method for performing random splitting on the dataset
+'''
 def _random_split(dataset):
 	num_row = len(dataset[list(dataset.keys())[0]])
 	num_feature = len(dataset.keys())
@@ -86,7 +98,19 @@ def _random_split(dataset):
 
 	return split, split_val
 
-
+'''
+Class _Node act as helper class for constructing the extra tree
+it has attribute as follows:
+ - left_child Node act as the left subtree of the extra tree
+ - right_child Node act as the right subtree of the extra tree
+ - split_feature string feature that act as a splitting decision
+ - split_val float/string if categorical, then it expect the left subtree to be equal to split_val.
+ 						if numerical, then it expect the left subtree to be less than split_val
+ - is_leaf boolean identifying if the node is a leaf
+ - leaf_value string label if the node is a leaf
+ - score float information gain from the cut-point
+ - depth int depth of the node
+'''
 class _Node():
 	def __init__(self):
 		self.left_child = None
@@ -98,13 +122,28 @@ class _Node():
 		self.score = 0
 		self.depth = 0
 
+'''
+Core implementation for ExtraTreeClassifier
+'''
 class ExtraTreeClassifier():
+	'''
+	Instantiation expect 2 arguments
+	- max_features int how many feature maximum which we should consider for a cut-point candidate
+	- min_split int how many datapoints minimum which we should consider to do a splitting
+	'''
 	def __init__(self, max_features, min_split):
 		self.MAX_DEPTH = 100
 		self.max_features = max_features
 		self.min_split = min_split
 		self.root = _Node()
 
+	'''
+	Helper function to train & build the model. the model will be built recursively.
+	it expects 3 arguments
+	- data map of list the datapoints collection in pandas dataframe format
+	- label list storing label for each datapoint
+	- depth the node depth
+	'''
 	def __train(self, data, label, depth):
 		node = _Node()
 		num_row = len(data[list(data.keys())[0]])
@@ -174,6 +213,14 @@ class ExtraTreeClassifier():
 
 			return node
 
+	'''
+	Helper function to evaluate test data onto the model
+	it expects 2 arguments
+	- node Node current node from the extratree
+	- datapoint dictionary a single datapoint that want to be predicted
+	return
+	- predicted label
+	'''
 	def __predict(self, node, datapoint):
 		if node.is_leaf == True:
 			return node.leaf_value
@@ -189,10 +236,18 @@ class ExtraTreeClassifier():
 			else:
 				return self.__predict(node.right_child, datapoint)
 
+	'''
+	Core function for training subroutine. First it train the model,
+	and next it evaluate the model with its training data
+	'''
 	def train(self, data, label):
 		self.root = self.__train(data, label, 1)
 		return self.predict(data)
 
+	'''
+	Core function for predict subroutine.
+	It will iterate through all datapoints and predicting the class/label for each of it.
+	'''
 	def predict(self, data):
 		label = []
 		for idx in range(len(data[list(data.keys())[0]])):
