@@ -1,4 +1,5 @@
 import math
+import random
 
 def __entropy(labels):
 	n = len(labels)
@@ -35,31 +36,57 @@ def __max_freq(labels):
 	return frequent_label
 
 def __score(labels, split):
-	n = len(split)
-	nAtt = len(split[0])
+	num_row = len(split[split.keys()[0]])
+	num_feature = len(split.keys())
 
-	h_c = __entropy(labels)
-	C_ct = list()
+	out_entropy = __entropy(labels)
+	normalized_info_gain = {}
 
-	for i in range(nAtt) :
-		curr_split = split[:,i]
-		h_t = __entropy(curr_split)
-		idx_c1 = [i for (i, val) in enumerate(curr_split) if val in curr_split]
-		idx_c2 = [i for (i, val) in enumerate(curr_split) if val not in curr_split]
-		y_c1 = labels[idx_c1]
-		y_c2 = labels[idx_c2]
+	for feature in range(num_feature) :
+		curr_split = split[feature]
+		split_entropy = __entropy(curr_split)
+		idx_left_child = [key for (key, val) in enumerate(curr_split) if val == True]
+		idx_right_child = [key for (key, val) in enumerate(curr_split) if val == False]
 
-		h_ct = __entropy(y_c1) + __entropy(y_c2)
-		I_ct = h_c - h_ct
-		C_ct = 2*I_ct/(h_c+h_t)
-	
-	scores = C_ct
-	
-	return [val for (i, val) in enumerate(curr_split) if i == None]
+		y_left_child = [ labels[key] for key in idx_left_child ]
+		y_right_child = [ labels[key] for key in idx_right_child ]
 
+		average_split_entropy = (len(y_left_child)/num_row)*__entropy(y_left_child) + (len(y_right_child)/num_row)*__entropy(y_right_child)
+		info_gain = out_entropy - average_split_entropy
+		normalized_info_gain[feature] = 2.0*info_gain/(out_entropy+split_entropy)
 
-def __random_split():
-	pass
+	return normalized_info_gain
+
+def __random_split(dataset):
+	num_row = len(dataset[dataset.keys()[0]])
+	num_feature = len(dataset.keys())
+
+	split = {}
+	split_val = []
+	for feature in dataset.keys():
+		split[feature] = []
+
+		if type(dataset[feature][0]) == float : #numerical feature
+			maks = dataset[feature][0]
+			mins = dataset[feature][0]
+			for data in dataset[feature]:
+				maks = max(maks, data)
+				mins = min(mins, data)
+
+			cut_point = (maks-mins)*random.uniform(0, 1) + mins
+
+			split_val.append(cut_point)
+			for data in dataset[feature]:
+				split[feature].append(data > cut_point)
+		else :
+			selected_sample = random.choice(dataset[feature])
+
+			split_val.append(selected_sample)
+			for data in dataset[feature]:
+				split[feature].append(data == selected_sample)
+
+	return split, split_val
+
 
 class __ExtraTreeClassifier():
 	## TODO: core implementation of ETClassifier
