@@ -3,6 +3,7 @@ from random import randrange
 
 class CrossValidation: 
 
+
 	def train_test_split(dataset, split=0.6): 
 		train = list()
 		train_size = split*len(dataset)
@@ -46,8 +47,8 @@ class CrossValidation:
 		train_folds_score = []
 		validation_folds_score = []
 		for fold in range(0, k): 
-			training_set, validation_set = cross_validation_split(dataset, k)
-			training_label, validation_label = cross_validation_split(label, k)
+			training_set, validation_set = cross_validation_fold(cross_validation_split(dataset, k), i)
+			training_label, validation_label = cross_validation_fold(cross_validation_split(label, k),i)
 			learner.train(training_set, training_label)
 			training_predict = learner.predict(training_set)
 			validation_predict = learner.predict(validation_set)
