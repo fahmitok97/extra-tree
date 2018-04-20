@@ -34,9 +34,9 @@ class CrossValidation:
 		validation_set = list()
 		for i in range(len(split)): 
 			if (i == fold):
-				validation_set.append(split[i])
+				validation_set.extend(split[i])
 			else: 
-				training_set.append(split[i])
+				training_set.extend(split[i])
 		return training_set, validation_set
 
 
