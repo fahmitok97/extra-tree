@@ -18,7 +18,7 @@ class CrossValidation:
 		dataset_split = list()
 		dataset_copy = list(dataset)
 		fold_size = int(len(dataset) / k)
-		for i in range(fold): 
+		for i in range(fold_size): 
 			fold = list()
 			while len(fold) < fold_size: 
 				index = randrange(len(dataset_copy))
@@ -47,8 +47,8 @@ class CrossValidation:
 		train_folds_score = []
 		validation_folds_score = []
 		for fold in range(0, k): 
-			training_set, validation_set = cross_validation_fold(cross_validation_split(dataset, k), i)
-			training_label, validation_label = cross_validation_fold(cross_validation_split(label, k),i)
+			training_set, validation_set = cross_validation_fold(cross_validation_split(dataset, k), fold)
+			training_label, validation_label = cross_validation_fold(cross_validation_split(label, k), fold)
 			learner.train(training_set, training_label)
 			training_predict = learner.predict(training_set)
 			validation_predict = learner.predict(validation_set)
