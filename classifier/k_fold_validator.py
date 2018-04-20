@@ -1,7 +1,4 @@
 from random import randrange
-from sklearn import metrics 
-import numpy as np 
-from sklearn.naive_bayes import MultinomialNB
 
 
 class CrossValidation: 
@@ -40,16 +37,20 @@ class CrossValidation:
 		return training_set, validation_set
 
 
-	def cross_validate(dataset, label, k=10): 
-		learner = MultinomialNB(alpha=0.001)
+	def accuracy_score(labels, predicts): 
+		count = len(["ok" for idx, label in enumerate(labels) if label == predicts[idx]])
+		return float(count) / len(labels)
+
+
+	def cross_validate(learner, dataset, label, k=10): 
 		train_folds_score = []
 		validation_folds_score = []
 		for fold in range(0, k): 
 			training_set, validation_set = cross_validation_split(dataset, k)
 			training_label, validation_label = cross_validation_split(label, k)
-			learner.fit(training_set, training_label)
+			learner.train(training_set, training_label)
 			training_predict = learner.predict(training_set)
 			validation_predict = learner.predict(validation_set)
-			train_folds_score.append(metrics.accuracy_score(training_label, training_predict))
-			validation_folds_score.append(metrics.accuracy_score(validation_label, validation_predict))
+			train_folds_score.append(accuracy_score(training_label, training_predict))
+			validation_folds_score.append(accuracy_score(validation_label, validation_predict))
 		return train_folds_score, validation_folds_score
