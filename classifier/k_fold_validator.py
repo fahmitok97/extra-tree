@@ -40,7 +40,7 @@ class CrossValidation:
 		return training_set, validation_set
 
 
-	def cross_validate(k, dataset, label): 
+	def cross_validate(dataset, label, k=10): 
 		learner = MultinomialNB(alpha=0.001)
 		train_folds_score = []
 		validation_folds_score = []
